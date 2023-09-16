@@ -9,19 +9,33 @@ use App\Entity\Conference;
 use App\Entity\Comment;
 use Doctrine\ORM\EntityManagerInterface;
 use DateTimeImmutable;
+use App\Repository\ConferenceRepository;
+use Twig\Environment;
+use App\Repository\CommentRepository;
+use Symfony\Component\HttpFoundation\Request;
 
 class ConferenceController extends AbstractController
 {
     #[Route('/', name: 'homepage')]
-    public function index(): Response
+    public function index(Environment $twig, ConferenceRepository $conferenceRepository): Response
     {
-        return new Response(<<<EOF
-            <html>
-                <body>
-                    <img src="/images/under-construction.gif" />
-                </body>
-            </html>
-            EOF
-        );
+        return new Response($twig->render('conference/index.html.twig', [
+                    'conferences' => $conferenceRepository->findAll(),
+            ]));
+    }
+
+
+    #[Route('/conference/{id}', name: 'conference')]
+    public function show(Request $request, Environment $twig, Conference $conference, CommentRepository $commentRepository): Response
+    {
+        $offset = max(0, $request->query->getInt('offset', 0));
+        $paginator = $commentRepository->getCommentPaginator($conference, $offset);
+
+        return new Response($twig->render('conference/show.html.twig', [
+            'conference' => $conference,
+            'comments' => $paginator,
+            'previous' => $offset - CommentRepository::PAGINATOR_PER_PAGE,
+            'next' => min(count($paginator), $offset + CommentRepository::PAGINATOR_PER_PAGE),
+        ]));
     }
 }
