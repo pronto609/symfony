@@ -11,6 +11,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 class CommentCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
@@ -24,7 +25,10 @@ class CommentCrudController extends AbstractCrudController
         return [
             TextField::new('author'),
             TextField::new('email'),
-            TextField::new('email'),
+            ImageField::new('photoFilename')
+            ->setBasePath('/uploads/photos')
+                ->setLabel('Photo')
+                ->onlyOnIndex(),
             AssociationField::new('conference'),
             TextEditorField::new('text'),
         ];
